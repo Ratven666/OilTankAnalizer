@@ -23,7 +23,7 @@ class Scan:
         return iter(self._points)
 
     def __str__(self):
-        return f"Scan (scan_name={self.name}, num_of_point={len(self)}, borders={self.borders})"
+        return f"{self.__class__.__name__} (scan_name={self.name}, num_of_point={len(self)}, borders={self.borders})"
 
     def add_point(self, point):
         if isinstance(point, ScanPoint):
@@ -84,10 +84,6 @@ class Scan:
             borders = self._check_border(borders_dict=borders,
                                          point=point)
         return borders
-
-
-
-
 
 
 

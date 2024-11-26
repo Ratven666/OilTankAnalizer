@@ -1,13 +1,17 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class PointsABC(ABC):
-    pass
+    @abstractmethod
+    def __init__(self, x, y, z=0):
+        self.x = x
+        self.y = y
+        self.z = z
 
 
 class Point(PointsABC):
 
-    def __init__(self, x, y, z=0):
+    def __init__(self, x, y, z):
         self.x = self.check_coordinates(x)
         self.y = self.check_coordinates(y)
         self.z = self.check_coordinates(z)
@@ -18,7 +22,7 @@ class Point(PointsABC):
         elif type(coord) == float:
             return coord
         else:
-            raise ValueError(f"Координата - {coord} - не число!")
+            raise ValueError(f"Координата - {coord} - не число ({type(coord)})!")
 
     def __str__(self):
         return f"Point (x={self.x}, y={self.y}, z={self.z})"
@@ -61,7 +65,7 @@ class NamedPoint(PointsABC):
 
 class ScanPoint(PointsABC):
 
-    def __init__(self, x, y, z, color=None):
+    def __init__(self, x, y, z, color=(0, 0, 0)):
         self.point = Point(x=x, y=y, z=z)
         self.color = color
 
@@ -76,9 +80,38 @@ class ScanPoint(PointsABC):
     @property
     def z(self):
         return self.point.z
+    #
+    # @x.setter
+    # def x(self, x):
+    #     self.x = x
+    #
+    # @y.setter
+    # def y(self, y):
+    #     self.y = y
 
     def __str__(self):
         return  f"ScanPoint (x={self.x}, y={self.y}, z={self.z}, color={self.color})"
+
+
+class DeformationPoint(ScanPoint):
+
+    def __init__(self, x, y, z, color=(0, 0, 0)):
+        super().__init__(x, y, z, color)
+        self.deformation = None
+
+    @classmethod
+    def create_def_point_from_point(cls, point: PointsABC):
+        if isinstance(point, ScanPoint):
+            return cls(x=point.x, y=point.y, z=point.z, color=point.color)
+        elif isinstance(point, PointsABC):
+            return cls(x=point.x, y=point.y, z=point.z)
+        else:
+            raise ValueError(f"Должен быть объект класса Point, передан {point.__class__}")
+
+    def __str__(self):
+        return  (f"DeformationPoint (x={self.x}, y={self.y}, z={self.z}, "
+                 f"deformation={self.deformation:.4f}, "
+                 f"color={self.color})")
 
 
 if __name__ == "__main__":
