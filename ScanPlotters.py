@@ -1,6 +1,5 @@
 import math
 from abc import ABC, abstractmethod
-from copy import deepcopy
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -79,6 +78,42 @@ class DeformationScanPlotterMPL(ScanPlotterABC):
         ax.scatter(x, y, z, c=c, cmap='bwr', norm=norm)
         if self.plot_cylinder:
             ax.plot_surface(*self._data_for_cylinder_along_z(), alpha=0.5)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.axis('equal')
+        plt.show()
+
+class DeformationScanPlotterFlatMPL:
+
+    def __init__(self, cylinder, def_scale):
+        self.cylinder = cylinder
+        self.def_scale = def_scale
+
+    def _calc_scaled_point(self, point):
+        azimuth = math.atan2(point.y - self.cylinder.y0,
+                             point.x - self.cylinder.x0)
+        if azimuth < 0:
+            azimuth += 2 * math.pi
+        x = point.z
+        y = self.cylinder.circle.r * azimuth
+        z = point.deformation * self.def_scale
+
+        from Points import DeformationPoint
+        s_point = DeformationPoint(x=float(x), y=float(y), z=float(z), color=point.color)
+        s_point.deformation = point.deformation
+        return s_point
+
+    def plot(self, scan):
+        ax = plt.figure().add_subplot(projection="3d")
+        x, y, z, c = [], [], [], []
+        norm = TwoSlopeNorm(vcenter=0)
+        for point in scan:
+            point = self._calc_scaled_point(point)
+            x.append(point.x)
+            y.append(point.y)
+            z.append(point.z)
+            c.append(point.deformation)
+        ax.scatter(x, y, z, c=c, cmap='bwr', norm=norm)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         plt.axis('equal')

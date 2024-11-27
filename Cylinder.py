@@ -21,9 +21,12 @@ class Cylinder:
         return f"Cylinder (circle={self.circle}, z_min={self.z_min}, z_max={self.z_max})"
 
     @classmethod
-    def best_fit_cylinder_in_scan(cls, x0, y0, r0, scan: Scan):
+    def best_fit_cylinder_in_scan(cls, x0, y0, r0, scan: Scan, max_iteration=50, max_tolerance=1e-4, print_log=True):
         circle_0 = Circle(x0=x0, y0=y0, r=r0)
-        circle_0.best_fit_circle_in_scan(scan=scan)
+        circle_0.best_fit_circle_in_scan(scan=scan,
+                                         max_iteration=max_iteration,
+                                         max_tolerance=max_tolerance,
+                                         print_log=print_log)
         return cls(circle=circle_0,
                    z_min=scan.borders["z_min"],
                    z_max=scan.borders["z_max"],

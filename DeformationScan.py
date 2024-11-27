@@ -12,7 +12,7 @@ class DeformationScan(Scan):
 
     def __str__(self):
         s_str = super().__str__()
-        return (f"{s_str}_def_limits=[({self.min_deformation:.3f})-({self.max_deformation:.3f})]_"
+        return (f"{s_str}\b\b def_limits=[({self.min_deformation:.3f})-({self.max_deformation:.3f})]_"
                 f"def_mse={self.mse:.3f}")
 
     def add_point(self, point):

@@ -5,7 +5,7 @@ from DeformationScan import DeformationScan
 from Scan import Scan
 from ScanFilters import ScanDelimiter, ScanFilterFromZminToZmax, ScanFilterFromCylinder
 from ScanParsers import ScanParserFormTxtWithoutColor
-from ScanPlotters import DeformationScanPlotterMPL
+from ScanPlotters import DeformationScanPlotterMPL, DeformationScanPlotterFlatMPL
 
 scan = Scan("OilTank")
 
@@ -17,6 +17,7 @@ print(scan)
 # f_scan.plot()
 # scan.filter_scan(filter_cls=ScanFilterFromZminToZmax, z_min=5, z_max=5.25)
 scan.filter_scan(filter_cls=ScanFilterFromZminToZmax, z_min=1, z_max=10)
+scan.filter_scan(filter_cls=ScanFilterFromZminToZmax, z_min=5, z_max=5.5)
 # scan = scan.filter_scan(filter_cls=ScanDelimiter, replace_points_in_scan=True, delimiter=10)
 
 print(scan)
@@ -52,4 +53,5 @@ print(def_scan)
 def_scan = def_scan.filter_scan(filter_cls=ScanDelimiter, replace_points_in_scan=False, delimiter=10)
 print(def_scan)
 
-def_scan.plot(plotter=DeformationScanPlotterMPL, cylinder=cylinder, def_scale=50, plot_cylinder=False)
+# def_scan.plot(plotter=DeformationScanPlotterMPL, cylinder=cylinder, def_scale=50, plot_cylinder=False)
+# def_scan.plot(plotter=DeformationScanPlotterFlatMPL, cylinder=cylinder, def_scale=200)

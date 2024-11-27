@@ -29,7 +29,6 @@ class Point(PointsABC):
 
 
 class NamedPoint(PointsABC):
-
     _names = []
 
     def __init__(self, x, y, z, name=None):
@@ -45,6 +44,7 @@ class NamedPoint(PointsABC):
             else:
                 self._names.append(name)
                 return name
+
     @property
     def x(self):
         return self.point.x
@@ -80,17 +80,9 @@ class ScanPoint(PointsABC):
     @property
     def z(self):
         return self.point.z
-    #
-    # @x.setter
-    # def x(self, x):
-    #     self.x = x
-    #
-    # @y.setter
-    # def y(self, y):
-    #     self.y = y
 
     def __str__(self):
-        return  f"ScanPoint (x={self.x}, y={self.y}, z={self.z}, color={self.color})"
+        return f"ScanPoint (x={self.x}, y={self.y}, z={self.z}, color={self.color})"
 
 
 class DeformationPoint(ScanPoint):
@@ -109,9 +101,9 @@ class DeformationPoint(ScanPoint):
             raise ValueError(f"Должен быть объект класса Point, передан {point.__class__}")
 
     def __str__(self):
-        return  (f"DeformationPoint (x={self.x}, y={self.y}, z={self.z}, "
-                 f"deformation={self.deformation:.4f}, "
-                 f"color={self.color})")
+        return (f"DeformationPoint (x={self.x}, y={self.y}, z={self.z}, "
+                f"deformation={self.deformation:.4f}, "
+                f"color={self.color})")
 
 
 if __name__ == "__main__":
@@ -128,5 +120,3 @@ if __name__ == "__main__":
 
     for point in [p1, np1, np2, sp1]:
         print(isinstance(point, PointsABC), point)
-
-
