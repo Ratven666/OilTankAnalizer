@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
+from scipy.interpolate import Rbf
 
 
 class ScanPlotterABC(ABC):
@@ -75,7 +76,7 @@ class DeformationScanPlotterMPL(ScanPlotterABC):
             y.append(point.y)
             z.append(point.z)
             c.append(point.deformation)
-        ax.scatter(x, y, z, c=c, cmap='bwr', norm=norm)
+        ax.scatter(x, y, z, c=c, cmap='seismic', norm=norm)
         if self.plot_cylinder:
             ax.plot_surface(*self._data_for_cylinder_along_z(), alpha=0.5)
         ax.set_xlabel('X')
@@ -83,25 +84,27 @@ class DeformationScanPlotterMPL(ScanPlotterABC):
         plt.axis('equal')
         plt.show()
 
-class DeformationScanPlotterFlatMPL:
 
-    def __init__(self, cylinder, def_scale):
-        self.cylinder = cylinder
+class FlatDeformationScanPlotterMPL:
+
+    def __init__(self, def_scale=1, plot_flat=True):
         self.def_scale = def_scale
+        self.plot_flat = plot_flat
 
     def _calc_scaled_point(self, point):
-        azimuth = math.atan2(point.y - self.cylinder.y0,
-                             point.x - self.cylinder.x0)
-        if azimuth < 0:
-            azimuth += 2 * math.pi
-        x = point.z
-        y = self.cylinder.circle.r * azimuth
         z = point.deformation * self.def_scale
-
         from Points import DeformationPoint
-        s_point = DeformationPoint(x=float(x), y=float(y), z=float(z), color=point.color)
+        s_point = DeformationPoint(x=float(point.x), y=float(point.y), z=float(z), color=point.color)
         s_point.deformation = point.deformation
         return s_point
+
+    def _get_flat_data(self, scan):
+        x = np.linspace(scan.borders["x_min"], scan.borders["x_max"], 50)
+        y = np.linspace(scan.borders["y_min"], scan.borders["y_max"], 50)
+        x_grid, y_grid = np.meshgrid(x, y)
+        z = np.zeros_like(x_grid)
+        return x_grid, y_grid, z
+
 
     def plot(self, scan):
         ax = plt.figure().add_subplot(projection="3d")
@@ -113,8 +116,98 @@ class DeformationScanPlotterFlatMPL:
             y.append(point.y)
             z.append(point.z)
             c.append(point.deformation)
-        ax.scatter(x, y, z, c=c, cmap='bwr', norm=norm)
+        ax.scatter(x, y, z, c=c, cmap='seismic', norm=norm)
+        if self.plot_flat:
+            ax.plot_surface(*self._get_flat_data(scan), alpha=0.5)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         plt.axis('equal')
         plt.show()
+
+class DeformationInterpolation(ScanPlotterABC):
+
+    functions = ['multiquadric', 'inverse', 'gaussian', 'linear', 'cubic', 'quintic', 'thin_plate']
+
+    def __init__(self, function_type="multiquadric", def_scale=1, show_points=False):
+        self.function_type = function_type
+        self.def_scale = def_scale
+        self.show_points = show_points
+
+    def plot(self, scan):
+        ax = plt.figure().add_subplot(projection="3d")
+        norm = TwoSlopeNorm(vcenter=0)
+        x, y, z, c = [], [], [], []
+        for point in scan:
+            x.append(point.x)
+            y.append(point.y)
+            z.append(point.z * self.def_scale)
+            c.append(point.color)
+        x_grid, y_grid = np.meshgrid(np.linspace(scan.borders["x_min"], scan.borders["x_max"], 100),
+                                     np.linspace(scan.borders["y_min"], scan.borders["y_max"], 100))
+        rbf = Rbf(x, y, z, function=self.function_type)
+        z_grid = rbf(x_grid, y_grid)
+        if self.show_points:
+            ax.scatter(x, y, z, c=c, marker='o')
+        ax.plot_surface(x_grid, y_grid, z_grid, cmap='seismic', alpha=0.5, norm=norm)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.axis('equal')
+        plt.show()
+
+class DeformationInterpolationHeatMap(ScanPlotterABC):
+
+    functions = ['multiquadric', 'inverse', 'gaussian', 'linear', 'cubic', 'quintic', 'thin_plate']
+
+    def __init__(self, function_type="linear", show_points=False):
+        self.function_type = function_type
+        self.show_points = show_points
+
+    def plot(self, scan):
+        norm = TwoSlopeNorm(vcenter=0)
+        x, y, z, c = [], [], [], []
+        for point in scan:
+            x.append(point.x)
+            y.append(point.y)
+            z.append(point.z)
+            c.append(point.color)
+        x_grid, y_grid = np.meshgrid(np.linspace(scan.borders["x_min"], scan.borders["x_max"], 100),
+                                     np.linspace(scan.borders["y_min"], scan.borders["y_max"], 1000))
+        rbf = Rbf(x, y, z, function=self.function_type)
+        z_grid = rbf(x_grid, y_grid)
+        # z_grid_rotated = np.rot90(z_grid)
+        z_grid_rotated = z_grid.T
+
+        plt.figure(figsize=(8, 6))
+        if self.show_points:
+            plt.scatter(x, y, z, c=c, marker='o')
+        plt.imshow(z_grid_rotated, extent=[scan.borders["y_min"], scan.borders["y_max"],
+                                           scan.borders["x_min"], scan.borders["x_max"]],
+                   # origin='lower', cmap='seismic', norm=norm)
+                   origin='lower', cmap='bwr', norm=norm)
+
+        # Добавляем заполненные горизонтали
+        # contours = plt.contourf(y_grid, x_grid, z_grid, alpha=.75, cmap='seismic', norm=norm)
+        # plt.colorbar(contours, label='Z values')
+
+        # Добавляем горизонтали
+        contours = plt.contour(y_grid, x_grid, z_grid, colors='black')
+        plt.clabel(contours, inline=True, fontsize=8)
+
+        # Получаем координаты контуров
+        for collection in contours.collections:
+            for path in collection.get_paths():
+                vertices = path.vertices
+                x_coords = vertices[:, 0]
+                y_coords = vertices[:, 1]
+                print(f"X coordinates: {x_coords}")
+                print(f"Y coordinates: {y_coords}")
+
+        # plt.colorbar(label='Z values')
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.axis('equal')
+        # plt.savefig('high_resolution_heatmap.svg', dpi=300, bbox_inches='tight', format="svg")
+        plt.savefig('high_resolution_heatmap.png', dpi=300, bbox_inches='tight', format="png")
+        plt.show()
+
+

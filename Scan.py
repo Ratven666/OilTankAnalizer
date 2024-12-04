@@ -1,4 +1,5 @@
 from Points import ScanPoint
+from ScanExporters import ScanExportersToTxt
 from ScanParsers import ScanParserFormTxt
 from ScanPlotters import ScanPlotterMPL
 
@@ -33,6 +34,10 @@ class Scan:
     def load_points_from_file(self, file_path, parser=ScanParserFormTxt):
         parser = parser(file_path)
         parser.parse(scan=self)
+
+    def export_points_from_file(self, file_path, parser=ScanExportersToTxt):
+        parser = parser(file_path)
+        parser.export(scan=self)
 
     def filter_scan(self, filter_cls, *args, replace_points_in_scan=True, **kwargs):
         filter = filter_cls(*args, **kwargs)

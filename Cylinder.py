@@ -17,6 +17,10 @@ class Cylinder:
     def y0(self):
         return self.circle.y0
 
+    @property
+    def r(self):
+        return self.circle.r
+
     def __str__(self):
         return f"Cylinder (circle={self.circle}, z_min={self.z_min}, z_max={self.z_max})"
 
