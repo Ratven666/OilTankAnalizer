@@ -1,22 +1,28 @@
-import math
+# import matplotlib.pyplot as plt
+# import matplotlib.cm as cm
+# import numpy as np
+#
+# # Создаем цветовую карту
+# cmap = plt.get_cmap('seismic')
+#
+# # Индексы, для которых хотим получить цвета (от 0 до 1)
+# indices = np.linspace(0, 1, 11)
+#
+# # Получаем цвета по индексам
+# colors = cmap(indices)
+#
+# # Выводим значения цветов
+# for i, color in zip(indices, colors):
+#     print(f"Индекс: {i:.2f}, Цвет: {color}")
+#
+# # Пример использования цветов в графиках
+# fig, ax = plt.subplots()
+# for i, color in zip(indices, colors):
+#     ax.plot([0, 1], [i, i], color=color, label=f"Индекс: {i:.2f}")
+#
+# ax.legend()
+# plt.show()
+import random
 
-import numpy as np
-
-z_min = -2.455
-
-l_s = 0.01
-
-print(math.fmod(z_min,l_s))
-print(z_min // l_s)
-print(z_min % l_s)
-
-print(z_min - math.fmod(z_min,l_s))
-
-z0 = 1
-z_max = 10
-
-levels_step = 0.5
-
-print(np.arange(z0, z_max + 1e-9, levels_step))
-
-print(np.linspace(0, 360, 9)[:-1])
+for i in range(50):
+    print(random.randint(0, 5))

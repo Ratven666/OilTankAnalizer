@@ -12,7 +12,7 @@ from Points import DeformationPoint
 
 class FlatDeformationScan(DeformationScan):
 
-    def __init__(self, scan_name, def_scale=None, rbf_function="linear"):
+    def __init__(self, scan_name, def_scale=1, rbf_function="linear"):
         super().__init__(scan_name)
         self.def_scale = def_scale
         self.function = rbf_function
@@ -24,40 +24,50 @@ class FlatDeformationScan(DeformationScan):
         return (f"{self.__class__.__name__} (scan_name={self.name}, "
                 f"num_of_point={len(self)}, borders={self.borders})")
 
-    def get_rbf(self, function="linear"):
-        if self.rbf is None:
+    def get_rbf(self, function=None):
+        def get_points_lists(scan):
             x, y, z = [], [], []
-            for point in self:
+            for point in scan:
                 x.append(point.x)
                 y.append(point.y)
                 z.append(point.z)
-            self.rbf = Rbf(x, y, z, function=function)
-        return self.rbf
+            return x, y, z
 
-    def _get_flat_contours(self, levels, function):
+        if self.rbf is None and function is None:
+            self.rbf = Rbf(*get_points_lists(self), function=self.function)
+            return self.rbf
+        elif self.rbf is not None and (function is None or function==self.function):
+            return self.rbf
+        else:
+            return Rbf(*get_points_lists(self), function=function)
+
+    def get_flat_contours(self, levels_step=0.01, function="linear", def_scale=1):
+        levels_0 = self.borders["z_min"] - math.fmod(self.borders["z_min"], levels_step)
+        levels = np.arange(levels_0, self.borders["z_max"], levels_step)
         rbf = self.get_rbf(function=function)
         x_grid, y_grid = np.meshgrid(np.linspace(0, self.borders["y_max"], 1000),
                                      np.linspace(self.borders["x_min"], self.borders["x_max"], 100))
         z_grid = rbf(y_grid, x_grid)
+        z_grid *= def_scale
         contours = plt.contour(x_grid, y_grid, z_grid, levels=levels, colors='black')
         contours_dict = {}
         for idx, contour in enumerate(contours.collections):
             contours_dict[levels[idx]] = contour
         return contours_dict
 
-    def get_circular_sections(self, levels_step=0.01, function="linear", def_scale=1):
-        levels_0 = self.borders["z_min"] - math.fmod(self.borders["z_min"], levels_step)
-        levels = np.arange(levels_0, self.borders["z_max"], levels_step)
-        flat_contours = self._get_flat_contours(levels, function)
+    def get_circular_sections(self, levels_step=0.01, function="linear", def_scale=None):
+        if def_scale is None:
+            def_scale = self.def_scale
+        flat_contours = self.get_flat_contours(levels_step=levels_step, function=function)
         contours = {}
         for level, collection in flat_contours.items():
             for path in collection.get_paths():
                 segments = path.to_polygons()
                 for idx, segment in enumerate(segments):
-                    x_coords = segment[:, 0]
-                    y_coords = segment[:, 1]
+                    x_coords = segment[:-1, 0]
+                    y_coords = segment[:-1, 1]
                     z_coords = np.full_like(x_coords, level)
-                    for idx in len(x_coords):
+                    for idx in range(len(x_coords)):
                         azimuth = x_coords[idx] / self.cylinder.r
                         r = self.cylinder.r + z_coords[idx] * def_scale
                         z_coords[idx] = y_coords[idx]
@@ -66,38 +76,32 @@ class FlatDeformationScan(DeformationScan):
                     contours[f"{level}_{idx}"] = [x_coords, y_coords, z_coords]
         return contours
 
-
     def save_flat_contours_to_dxf(self, levels_step=0.01, file_path='contours.dxf', function="linear"):
-        levels_0 = self.borders["z_min"] - math.fmod(self.borders["z_min"], levels_step)
-        levels = np.arange(levels_0, self.borders["z_max"], levels_step)
-        contours = self._get_flat_contours(levels=levels, function=function)
-        # Создаем новый DXF файл
-        doc = ezdxf.new('R2010')  # Создаем новый документ DXF
-        msp = doc.modelspace()  # Получаем пространство модели
-        # Добавляем полилинии в DXF файл
-        # for level, collection in zip(levels, contours.collections):
+        contours = self.get_flat_contours(levels_step=levels_step, function=function)
+        doc = ezdxf.new('R2010')
+        msp = doc.modelspace()
         for level, collection in contours.items():
             for path in collection.get_paths():
                 segments = path.to_polygons()
                 for segment in segments:
-                    x_coords = segment[:, 0]
-                    y_coords = segment[:, 1]
+                    x_coords = segment[:-1, 0]
+                    y_coords = segment[:-1, 1]
                     z_coords = np.full_like(x_coords, level)
-                    msp.add_lwpolyline(list(zip(x_coords[:-1], y_coords[:-1], z_coords[:-1])),
+                    msp.add_lwpolyline(list(zip(x_coords, y_coords, z_coords)),
                                        dxfattribs={'elevation': z_coords[0]})
         doc.saveas(file_path)
 
     @staticmethod
     def save_sections_to_dxf(sections_dict, file_path='section.dxf'):
-        # Создаем новый DXF файл
-        doc = ezdxf.new('R2010')  # Создаем новый документ DXF
-        msp = doc.modelspace()  # Получаем пространство модели
-        # Добавляем полилинии в DXF файл
+        doc = ezdxf.new('R2010')
+        msp = doc.modelspace()
         for level, section in sections_dict.items():
             msp.add_polyline3d(list(zip(section[0], section[1], section[2])))
         doc.saveas(file_path)
 
-    def get_horizontal_section(self, z0, z_max, levels_step, count_of_segments=100, function="linear", def_scale=1):
+    def get_horizontal_section(self, z0, z_max, levels_step, count_of_segments=100, function="linear", def_scale=None):
+        if def_scale is None:
+            def_scale = self.def_scale
         rbf = self.get_rbf(function=function)
         contours = {}
         sec_elevations = np.arange(z0, z_max + 1e-5, levels_step)
@@ -115,7 +119,9 @@ class FlatDeformationScan(DeformationScan):
         return contours
 
     def get_vertical_section(self, start_azimuth=0, end_azimuth=360, count_of_section=8,
-                             count_of_segments=100, function="linear", def_scale=1):
+                             count_of_segments=100, function="linear", def_scale=None):
+        if def_scale is None:
+            def_scale = self.def_scale
         rbf = self.get_rbf(function=function)
         contours = {}
         sec_angels = np.linspace(start_azimuth, end_azimuth, count_of_section+1)[:-1]
@@ -132,28 +138,6 @@ class FlatDeformationScan(DeformationScan):
                 y_grid[idx] = self.cylinder.y0 + r * math.sin(azimuth)
             contours[sec_angle] = [x_grid, y_grid, z_grid]
         return contours
-
-
-
-
-        # ax = plt.figure().add_subplot(projection="3d")
-        #
-        #
-        # ax.scatter(x_grid, y_grid, z_grid)
-        # ax.set_xlabel('X')
-        # ax.set_ylabel('Y')
-        # plt.axis('equal')
-        # plt.show()
-
-
-
-    # def _data_for_cylinder_along_z(self):
-    #     z = np.linspace(self.cylinder.z_min, self.cylinder.z_max, 100)
-    #     theta = np.linspace(0, 2 * np.pi, 1000)
-    #     theta_grid, z_grid = np.meshgrid(theta, z)
-    #     x_grid = self.cylinder.circle.r * np.cos(theta_grid) + self.cylinder.x0
-    #     y_grid = self.cylinder.circle.r * np.sin(theta_grid) + self.cylinder.y0
-    #     return x_grid, y_grid, z_grid
 
     @classmethod
     def create_flat_def_scan_from_cylinder_def_scan(cls, def_scan: DeformationScan,

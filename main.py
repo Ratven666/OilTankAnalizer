@@ -54,36 +54,54 @@ print(def_scan)
 def_scan = def_scan.filter_scan(filter_cls=ScanDelimiter, replace_points_in_scan=False, delimiter=10)
 print(def_scan)
 
-# def_scan.plot(plotter=DeformationScanPlotterMPL, cylinder=cylinder, def_scale=1, plot_cylinder=True)
+# def_scan.plot(plotter=DeformationScanPlotterMPL, cylinder=cylinder, def_scale=50, plot_cylinder=True)
 # def_scan.plot(plotter=DeformationScanPlotterFlatMPL, cylinder=cylinder, def_scale=200)
 
 
 
 flat_def_scan = FlatDeformationScan.create_flat_def_scan_from_cylinder_def_scan(def_scan=def_scan, cylinder=cylinder)
 
-# print(flat_def_scan)
 
-# flat_def_scan.export_points_from_file(file_path="flat_def_scan.txt")
+# contours = flat_def_scan.get_horizontal_section(z0=def_scan.borders["z_min"],
+#                                                 z_max=def_scan.borders["z_max"], levels_step=2,
+#                                                 count_of_segments=360, def_scale=50)
 
-# functions = ['multiquadric', 'inverse', 'gaussian', 'linear', 'cubic', 'quintic', 'thin_plate']
-# flat_def_scan.plot(plotter=DeformationInterpolation, def_scale=300, function_type="thin_plate", show_points=False)
-# flat_def_scan.plot(plotter=FlatDeformationScanPlotterMPL, def_scale=50)
 
-contours = flat_def_scan.get_horizontal_section(z0=def_scan.borders["z_min"],
-                                                z_max=def_scan.borders["z_max"], levels_step=2,
-                                                count_of_segments=360, def_scale=50)
 
-ax = plt.figure().add_subplot(projection="3d")
 
-for c in contours:
-    ax.scatter(*c)
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
+from mpl_toolkits.mplot3d import Axes3D
 
-contours = flat_def_scan.get_vertical_section(count_of_section=16, def_scale=50)
+fig = plt.figure()
 
-for c in contours:
-    ax.scatter(*c)
+ax = fig.add_subplot(111, projection='3d')
+
+contours = flat_def_scan.get_circular_sections(def_scale=50)
+
+for c in contours.values():
+    ax.plot(*c, linewidth=1)
+
+# contours = flat_def_scan.get_vertical_section(count_of_section=64, def_scale=50)
+#
+# for c in contours.values():
+#     ax.plot(*c, linewidth=1)
+#
+# contours = flat_def_scan.get_horizontal_section(z0=def_scan.borders["z_min"],
+#                                                 z_max=def_scan.borders["z_max"], levels_step=0.5,
+#                                                 count_of_segments=360, def_scale=50)
+# for c in contours.values():
+#     ax.plot(*c)
+
+
+# def data_for_cylinder_along_z(cylinder):
+#     z = np.linspace(cylinder.z_min, cylinder.z_max, 50)
+#     theta = np.linspace(0, 2 * np.pi, 50)
+#     theta_grid, z_grid = np.meshgrid(theta, z)
+#     x_grid = cylinder.circle.r * np.cos(theta_grid) + cylinder.x0
+#     y_grid = cylinder.circle.r * np.sin(theta_grid) + cylinder.y0
+#     return x_grid, y_grid, z_grid
+#
+#
+# ax.plot_surface(*data_for_cylinder_along_z(cylinder), alpha=0.5)
 
 plt.axis('equal')
 plt.show()
