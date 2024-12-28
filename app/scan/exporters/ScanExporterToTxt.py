@@ -1,9 +1,10 @@
+from app.scan.exporters.ScanExporterABC import ScanExporterABC
 
 
-class ScanExportersToTxt:
+class ScanExporterToTxt(ScanExporterABC):
 
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self, file_path, *args, **kwargs):
+        super().__init__(file_path, *args, **kwargs)
 
     def export(self, scan):
         with open(self.file_path, "w", encoding="UTF-8") as file:

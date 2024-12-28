@@ -1,11 +1,11 @@
-from FlatDeformationScan import FlatDeformationScan
-from ScanFilters import ScanDelimiter
-from ScanParsers import ScanParserFormTxtWithoutColor
-from ScanPlotters import FlatDeformationScanPlotterMPL, DeformationInterpolation, DeformationInterpolationHeatMap
+from app.deformation.__FlatDeformationScan import FlatDeformationScan
+from app.scan.filters.ScanFilters import ScanDelimiter
+from app.scan.parsers.ScanParsers import ScanParserFormTxtWithoutColor
+from app.scan.plotters.ScanPlotters import DeformationInterpolationHeatMap
 
 scan = FlatDeformationScan("Flat_DS_OilTank_filtered")
 
-scan.load_points_from_file(file_path="flat_def_scan.txt", parser=ScanParserFormTxtWithoutColor)
+scan.import_points_from_file(file_path="flat_def_scan.txt", parser=ScanParserFormTxtWithoutColor)
 print(scan)
 scan.filter_scan(filter_cls=ScanDelimiter, delimiter=10)
 print(scan)

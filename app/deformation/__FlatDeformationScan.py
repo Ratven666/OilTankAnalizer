@@ -5,9 +5,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import Rbf
 
-from Cylinder import Cylinder
-from DeformationScan import DeformationScan
-from Points import DeformationPoint
+from app.base.Cylinder import Cylinder
+from app.deformation.DeformationPoint import DeformationPoint
+from app.deformation.calculators.DeformationScan import DeformationScan
 
 
 class FlatDeformationScan(DeformationScan):

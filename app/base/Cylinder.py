@@ -1,5 +1,5 @@
-from Circle import Circle
-from Scan import Scan
+from app.base.Circle import Circle
+from app.scan.Scan import Scan
 
 
 class Cylinder:
