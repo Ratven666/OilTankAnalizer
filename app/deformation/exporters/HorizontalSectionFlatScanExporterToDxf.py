@@ -9,7 +9,7 @@ from app.scan.exporters.ScanExporterABC import ScanExporterABC
 
 class HorizontalSectionFlatScanExporterToDxf(ScanExporterABC):
 
-    def __init__(self, file_path="", z0=None, z_max=None, count_of_segments=100,
+    def __init__(self, file_path="", z0=None, z_max=None, count_of_segments=360,
                  levels_step=0.01, def_scale=1):
         super().__init__(file_path)
         self.levels_step = levels_step

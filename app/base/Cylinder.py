@@ -4,6 +4,8 @@ from app.scan.Scan import Scan
 
 class Cylinder:
 
+    cylinder_file_path_log = "cylinder_log_file.txt"
+
     def __init__(self, circle: Circle, z_min, z_max):
         self.circle = circle
         self.z_min = z_min
@@ -24,6 +26,10 @@ class Cylinder:
     def __str__(self):
         return f"Cylinder (circle={self.circle}, z_min={self.z_min}, z_max={self.z_max})"
 
+    def print_log_to_file(self):
+        with open(self.cylinder_file_path_log, "a") as file:
+            file.write(f"{self}\n")
+
     @classmethod
     def best_fit_cylinder_in_scan(cls, x0, y0, r0, scan: Scan, max_iteration=50, max_tolerance=1e-4, print_log=True):
         circle_0 = Circle(x0=x0, y0=y0, r=r0)
@@ -31,7 +37,10 @@ class Cylinder:
                                          max_iteration=max_iteration,
                                          max_tolerance=max_tolerance,
                                          print_log=print_log)
-        return cls(circle=circle_0,
+        cylinder = cls(circle=circle_0,
                    z_min=scan.borders["z_min"],
                    z_max=scan.borders["z_max"],
                    )
+        if print_log:
+            cylinder.print_log_to_file()
+        return cylinder
