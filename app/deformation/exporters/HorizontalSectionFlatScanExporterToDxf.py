@@ -1,4 +1,5 @@
 import math
+import os
 
 import ezdxf
 import numpy as np
@@ -64,7 +65,7 @@ class HorizontalSectionFlatScanExporterToDxf(ScanExporterABC):
             if self.file_path == "":
                 file_path = self.get_file_name(flat_def_scan=scan)
             else:
-                file_path = self.file_path
+                file_path = os.path.join(self.file_path, self.get_file_name(flat_def_scan=scan))
             self.save_sections_to_dxf(sections_dict=horizontal_sections, file_path=file_path)
         else:
             raise ValueError(f"Должен быть скан типа FlatDeformationScan, пеередан - {scan.__class__.__name__}")

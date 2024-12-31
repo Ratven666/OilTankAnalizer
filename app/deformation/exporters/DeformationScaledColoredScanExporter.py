@@ -1,4 +1,5 @@
 import math
+import os
 from copy import deepcopy
 
 from matplotlib import pyplot as plt
@@ -6,7 +7,7 @@ from matplotlib.colors import TwoSlopeNorm
 
 from app.base.Cylinder import Cylinder
 from app.deformation.FlatDeformationScan import FlatDeformationScan
-from app.deformation.calculators.DeformationScan import DeformationScan
+from app.deformation.DeformationScan import DeformationScan
 from app.scan.exporters.ScanExporterABC import ScanExporterABC
 from app.scan.exporters.ScanExporterToTxt import ScanExporterToTxt
 
@@ -48,8 +49,17 @@ class DeformationScaledColoredScanExporter(ScanExporterABC):
         for point in self.def_scan:
             scaler_func(point)
 
+    def get_file_name(self):
+        if isinstance(self.def_scan, FlatDeformationScan):
+            return f"FlatDeformationScan {self.def_scan.name}_def_scale={self.def_scale}.txt"
+        elif isinstance(self.def_scan, DeformationScan):
+            return f"DeformationScan {self.def_scan.name}_def_scale={self.def_scale}.txt"
+        else:
+            return f"Scan {self.def_scan.name}_def_scale={self.def_scale}.txt"
+
     def export(self, scan: DeformationScan):
         self.def_scan = deepcopy(scan)
+        file_path = os.path.join(self.file_path, self.get_file_name())
         self._init_point_colors_by_deformation()
         self._calk_scaled_scan()
-        self.def_scan.export_data_to_file(exporter=ScanExporterToTxt, file_path=self.file_path)
+        self.def_scan.export_data_to_file(exporter=ScanExporterToTxt, file_path=file_path)

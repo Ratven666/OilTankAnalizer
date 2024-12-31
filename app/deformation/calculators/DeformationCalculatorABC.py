@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 
-from app.deformation.calculators.DeformationScan import DeformationScan
+from app.deformation.DeformationScan import DeformationScan
 
 
 class DeformationCalculatorABC(ABC):

@@ -174,3 +174,5 @@ cython_debug/
 *.dxf
 
 src/cylinder_log_file.txt
+
+src/

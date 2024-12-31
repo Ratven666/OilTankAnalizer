@@ -1,4 +1,5 @@
 import math
+import os
 
 import ezdxf
 import numpy as np
@@ -45,7 +46,7 @@ class FlatDefScanContoursExporterToDxf(ScanExporterABC):
         if self.file_path == "":
             file_path = self.get_file_name(flat_def_scan=flat_def_scan)
         else:
-            file_path = self.file_path
+            file_path = os.path.join(self.file_path, self.get_file_name(flat_def_scan=flat_def_scan))
         doc = ezdxf.new("R2010")
         msp = doc.modelspace()
         for level, collection in contours.items():

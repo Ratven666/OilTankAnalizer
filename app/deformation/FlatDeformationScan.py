@@ -4,7 +4,7 @@ from scipy.interpolate import Rbf
 
 from app.base.Cylinder import Cylinder
 from app.deformation.DeformationPoint import DeformationPoint
-from app.deformation.calculators.DeformationScan import DeformationScan
+from app.deformation.DeformationScan import DeformationScan
 
 
 class FlatDeformationScan(DeformationScan):

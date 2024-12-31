@@ -5,7 +5,11 @@ from pathlib import Path
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtWidgets import QWidget, QApplication, QFileDialog, QMessageBox
 
+from app.deformation.DeformationScan import DeformationScan
+from app.deformation.FlatDeformationScan import FlatDeformationScan
+from app.deformation.calculators.CylinderDeformationCalculator import CylinderDeformationCalculator
 from app.interface_utils.CylinderUICreator import CylinderUICreator
+from app.interface_utils.ScanExporterUIManager import ScanExporterUIManager
 from app.interface_utils.ScanUICreator import ScanUICreator
 
 
@@ -77,6 +81,31 @@ class Ui_OilTankAnalizer(QWidget):
                                  f"Переданы некорректные данные для расчета скана - {msg}!")
             return
 
+        def_scan = DeformationScan.create_def_scan_from_scan(scan=scan)
+        def_scan.calculate_deformation(deformation_calculator=CylinderDeformationCalculator,
+                                       cylinder=cylinder)
+        flat_def_scan = FlatDeformationScan.create_flat_def_scan_from_cylinder_def_scan(def_scan=def_scan,
+                                                                                        cylinder=cylinder)
+        def_scan.name = scan.name
+        flat_def_scan.name = scan.name
+
+        msg_set = ScanExporterUIManager(saving_info_numbers_data=self.saving_info_numbers_data,
+                                        is_cylinder_isoline_exp=self.cb_cylinder_izol_def.isChecked(),
+                                        is_flat_isoline_exp=self.cb_flat_izol_def.isChecked(),
+                                        is_vertical_sections_exp=self.cb_vert_section_def.isChecked(),
+                                        is_horizontal_sections_exp=self.cb_hor_section_def.isChecked(),
+                                        is_base_cylinder_scaled_point_cloud_exp=self.cb_save_def_pc.isChecked(),
+                                        is_flat_scaled_point_cloud_exp=self.cb_save_flat_def_pc.isChecked(),
+                                        scan_file_path=self.base_filepath,
+                                        cylinder=cylinder,
+                                        def_scan=def_scan,
+                                        flat_def_scan=flat_def_scan).export_data()
+        if len(msg_set) > 1:
+            for msg in msg_set:
+                if msg != "OK":
+                    QMessageBox.critical(self, "Ошибка",
+                                         f"Переданы некорректные данные для экспорта данных - {msg}!")
+                    return
 
         print(self.cylinder_numbers_data)
         print(self.filtering_numbers_data)
@@ -112,7 +141,7 @@ class Ui_OilTankAnalizer(QWidget):
                                                                                 self.pt_vert_section_az_min,
                                                                             "Азимут_max, deg":
                                                                                 self.pt_vert_section_az_max,
-                                                                            "Количество сечений, шт:":
+                                                                            "Количество сечений, шт":
                                                                                 self.pt_vert_section_count,
                                                                             "Z_min, м": self.pt_hor_section_z_min,
                                                                             "Z_max, м": self.pt_hor_section_z_max,
