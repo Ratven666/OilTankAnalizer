@@ -3,6 +3,7 @@ from app.deformation.FlatDeformationScan import FlatDeformationScan
 from app.deformation.calculators.CylinderDeformationCalculator import CylinderDeformationCalculator
 from app.deformation.calculators.DeformationScan import DeformationScan
 from app.deformation.exporters.CircularSectionsDefScansExporterToDxf import CircularSectionsDefScansExporterToDxf
+from app.deformation.exporters.DeformationScaledColoredScanExporter import DeformationScaledColoredScanExporter
 from app.deformation.exporters.FlatDefScanContoursExporterToDxf import FlatDefScanContoursExporterToDxf
 from app.deformation.exporters.HorizontalSectionFlatScanExporterToDxf import HorizontalSectionFlatScanExporterToDxf
 from app.deformation.exporters.VerticalSectionsFlatScanExporterToDxf import VerticalSectionsFlatScanExporterToDxf
@@ -44,29 +45,30 @@ print(def_scan)
 
 flat_def_scan = FlatDeformationScan.create_flat_def_scan_from_cylinder_def_scan(def_scan=def_scan, cylinder=cylinder)
 print(flat_def_scan)
-
+flat_def_scan.export_data_to_file(exporter=DeformationScaledColoredScanExporter, file_path="ftest.txt", def_scale=50,
+                             base_obj=cylinder)
 # flat_def_scan.plot(plotter=FlatDeformationScanPlotterMPL)
-flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.005,
-                                  def_scale=50)
-flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.005,
-                                  def_scale=1)
-flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.01,
-                                  def_scale=50)
-flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
-                                  levels_step=0.005,
-                                  def_scale=50)
-flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
-                                  levels_step=0.005,
-                                  def_scale=1)
-flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
-                                  levels_step=0.01,
-                                  def_scale=50)
-flat_def_scan.export_data_to_file(file_path="", z0=4, z_max=5,
-                                  levels_step=0.1, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=1)
-flat_def_scan.export_data_to_file(file_path="",
-                                  levels_step=0.1, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=50)
-flat_def_scan.export_data_to_file(file_path="", z0=4, z_max=5,
-                                  levels_step=0.01, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.005,
+#                                   def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.005,
+#                                   def_scale=1)
+# flat_def_scan.export_data_to_file(file_path="", exporter=FlatDefScanContoursExporterToDxf, levels_step=0.01,
+#                                   def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
+#                                   levels_step=0.005,
+#                                   def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
+#                                   levels_step=0.005,
+#                                   def_scale=1)
+# flat_def_scan.export_data_to_file(file_path="", exporter=CircularSectionsDefScansExporterToDxf,
+#                                   levels_step=0.01,
+#                                   def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", z0=4, z_max=5,
+#                                   levels_step=0.1, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=1)
+# flat_def_scan.export_data_to_file(file_path="",
+#                                   levels_step=0.1, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=50)
+# flat_def_scan.export_data_to_file(file_path="", z0=4, z_max=5,
+#                                   levels_step=0.01, exporter=HorizontalSectionFlatScanExporterToDxf, def_scale=50)
 
 # flat_def_scan.export_data_to_file(file_path="", start_azimuth=45,
 #                                   end_azimuth=120, count_of_section=10,
