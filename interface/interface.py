@@ -40,24 +40,20 @@ class Ui_OilTankAnalizer(QWidget):
         self.cb_vert_section_def.stateChanged.connect(self.update_cb_vert_section_def)
         self.cb_hor_section_def.stateChanged.connect(self.update_cb_hor_section_def)
 
-
-
-        # self.slider_max_border_lenght.valueChanged.connect(self.sliders_update)
-        # self.slider_target_mse.valueChanged.connect(self.sliders_update)
-        # self.slider_iteration_counter.valueChanged.connect(self.sliders_update)
-        # self.sb_max_border_lenght.valueChanged.connect(self.sb_update)
-        # self.sb_target_mse.valueChanged.connect(self.sb_update)
-        # self.sb_iteration_counter.valueChanged.connect(self.sb_update)
         self.progressBar.setProperty("value", 0)
         self.start_button.clicked.connect(self.start_calculation)
 
     def start_calculation(self):
+        self.start_button.setEnabled(False)
+        self.progressBar.setProperty("value", 0)
         self.init_number_data()
         if self.data_correct_flag is False or self.data_correct_flag is None:
+            self.start_button.setEnabled(True)
+            self.textEdit_operation_log.setText(f"Расчет прерван!")
             return
-
+        print(f"Идет расчет базового цилиндра")
         self.textEdit_operation_log.setText(f"Идет расчет базового цилиндра")
-        time.sleep(0.5)
+        self.progressBar.setProperty("value", 5)
         cylinder, msg = CylinderUICreator(cylinder_numbers_data=self.cylinder_numbers_data,
                                           is_use_base_cylinder=self.cb_use_base_cyl.isChecked(),
                                           is_fit_cylinder=self.cb_fit_base_cyl.isChecked(),
@@ -67,7 +63,11 @@ class Ui_OilTankAnalizer(QWidget):
         if cylinder is None:
             QMessageBox.critical(self, "Ошибка",
                                  f"Переданы некорректные данные для построения базового цилиндра - {msg}!")
+            self.textEdit_operation_log.setText(f"Расчет прерван!")
+            self.start_button.setEnabled(True)
             return
+        self.progressBar.setProperty("value", 30)
+        print(f"Идет расчет скана")
         self.textEdit_operation_log.setText(f"Идет расчет скана")
         time.sleep(0.5)
         scan, msg = ScanUICreator(filtering_numbers_data=self.filtering_numbers_data,
@@ -79,8 +79,10 @@ class Ui_OilTankAnalizer(QWidget):
         if scan is None:
             QMessageBox.critical(self, "Ошибка",
                                  f"Переданы некорректные данные для расчета скана - {msg}!")
+            self.textEdit_operation_log.setText(f"Расчет прерван!")
+            self.start_button.setEnabled(True)
             return
-
+        self.progressBar.setProperty("value", 50)
         def_scan = DeformationScan.create_def_scan_from_scan(scan=scan)
         def_scan.calculate_deformation(deformation_calculator=CylinderDeformationCalculator,
                                        cylinder=cylinder)
@@ -88,7 +90,7 @@ class Ui_OilTankAnalizer(QWidget):
                                                                                         cylinder=cylinder)
         def_scan.name = scan.name
         flat_def_scan.name = scan.name
-
+        self.progressBar.setProperty("value", 70)
         msg_set = ScanExporterUIManager(saving_info_numbers_data=self.saving_info_numbers_data,
                                         is_cylinder_isoline_exp=self.cb_cylinder_izol_def.isChecked(),
                                         is_flat_isoline_exp=self.cb_flat_izol_def.isChecked(),
@@ -105,13 +107,12 @@ class Ui_OilTankAnalizer(QWidget):
                 if msg != "OK":
                     QMessageBox.critical(self, "Ошибка",
                                          f"Переданы некорректные данные для экспорта данных - {msg}!")
+                    self.textEdit_operation_log.setText(f"Расчет прерван!")
+                    self.start_button.setEnabled(True)
                     return
-
-        print(self.cylinder_numbers_data)
-        print(self.filtering_numbers_data)
-        print(self.saving_info_numbers_data)
-        print(cylinder)
-        print(scan)
+        self.progressBar.setProperty("value", 100)
+        self.textEdit_operation_log.setText(f"Расчет закончен!")
+        self.start_button.setEnabled(True)
 
     def init_number_data(self):
         self.cylinder_numbers_data = self.extract_numbers(text_browsers={"X, м": self.pt_bc_x,
@@ -160,7 +161,6 @@ class Ui_OilTankAnalizer(QWidget):
                 number = float(text)
                 text_browsers[label] = number
             except:
-                # text_browsers[label] = None
                 self.data_correct_flag = False
                 QMessageBox.critical(self, "Ошибка", f"В поле \"{label}\" не число, а \"{text}\"!")
                 return None
