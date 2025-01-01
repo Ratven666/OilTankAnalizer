@@ -1,5 +1,5 @@
-from Points import DeformationPoint
-from Scan import Scan
+from app.deformation.DeformationPoint import DeformationPoint
+from app.scan.Scan import Scan
 
 
 class DeformationScan(Scan):
@@ -50,24 +50,3 @@ class DeformationScan(Scan):
         deformation_calculator.calculate(def_scan=self)
         self._calk_def_limits()
         self._calk_def_mse()
-
-
-
-
-if __name__ == "__main__":
-    from ScanFilters import ScanFilterFromZminToZmax
-    from ScanParsers import ScanParserFormTxtWithoutColor
-
-    scan = Scan("OilTank")
-    scan.load_points_from_file(file_path="src/OilTank1.txt", parser=ScanParserFormTxtWithoutColor)
-
-    scan.plot()
-
-    scan.filter_scan(filter_cls=ScanFilterFromZminToZmax, z_min=5, z_max=5.25)
-    print(scan)
-    def_scan = DeformationScan.create_def_scan_from_scan(scan)
-    print(def_scan)
-
-    for point in def_scan:
-        print(point)
-

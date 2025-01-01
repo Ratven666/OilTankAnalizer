@@ -168,3 +168,11 @@ cython_debug/
 *.png
 
 *.svg
+
+*.las
+
+*.dxf
+
+src/cylinder_log_file.txt
+
+src/
