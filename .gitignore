@@ -172,7 +172,3 @@ cython_debug/
 *.las
 
 *.dxf
-
-src/cylinder_log_file.txt
-
-src/

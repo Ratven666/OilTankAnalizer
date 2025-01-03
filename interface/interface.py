@@ -40,6 +40,7 @@ class Ui_OilTankAnalizer(QWidget):
         self.cb_vert_section_def.stateChanged.connect(self.update_cb_vert_section_def)
         self.cb_hor_section_def.stateChanged.connect(self.update_cb_hor_section_def)
 
+        self.progressBar.setEnabled(True)
         self.progressBar.setProperty("value", 0)
         self.start_button.clicked.connect(self.start_calculation)
 
