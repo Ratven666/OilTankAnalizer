@@ -1,0 +1,1 @@
+python -m nuitka --enable-plugins=pyqt6 --product-version=1.0.0 --windows-icon-from-ico=OilTank.ico --onefile --standalone run.py
