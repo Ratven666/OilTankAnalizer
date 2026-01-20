@@ -22,7 +22,13 @@
 #
 # ax.legend()
 # plt.show()
-import random
+# import random
+#
+# for i in range(50):
+#     print(random.randint(0, 5))
+import os.path
 
-for i in range(50):
-    print(random.randint(0, 5))
+file_path = "/Users/mikhail_vystrchil/Documents/MY_PROGRAMMS/OilTankAnalizer/src/OilTank1.txt"
+
+base_path = os.path.dirname(file_path)
+print(base_path)

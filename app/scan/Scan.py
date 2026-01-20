@@ -1,7 +1,8 @@
-from Points import ScanPoint
-from ScanExporters import ScanExportersToTxt
-from ScanParsers import ScanParserFormTxt
-from ScanPlotters import ScanPlotterMPL
+from app.scan.ScanPoint import ScanPoint
+from app.scan.exporters.ScanExporterToTxt import ScanExporterToTxt
+from app.scan.parsers.ScanParserFactory import ScanParserFactory
+from app.scan.parsers.ScanParserFormTxt import ScanParserFormTxt
+from app.scan.plotters.ScanPlotterMPL import ScanPlotterMPL
 
 
 class Scan:
@@ -31,13 +32,13 @@ class Scan:
             self._points.append(point)
             self.borders = self._check_border(borders_dict=self.borders, point=point)
 
-    def load_points_from_file(self, file_path, parser=ScanParserFormTxt):
+    def import_points_from_file(self, file_path, parser=ScanParserFactory):
         parser = parser(file_path)
         parser.parse(scan=self)
 
-    def export_points_from_file(self, file_path, parser=ScanExportersToTxt):
-        parser = parser(file_path)
-        parser.export(scan=self)
+    def export_data_to_file(self, file_path, *args, exporter=ScanExporterToTxt, **kwargs):
+        exporter = exporter(file_path, *args, **kwargs)
+        exporter.export(scan=self)
 
     def filter_scan(self, filter_cls, *args, replace_points_in_scan=True, **kwargs):
         filter = filter_cls(*args, **kwargs)
@@ -89,16 +90,3 @@ class Scan:
             borders = self._check_border(borders_dict=borders,
                                          point=point)
         return borders
-
-
-
-if __name__ == "__main__":
-    scan = Scan("Scan1")
-    print(scan)
-    scan.load_points_from_file(file_path=r"src/SKLD.txt", parser=ScanParserFormTxt)
-    print(scan)
-
-    scan.plot()
-    # for point in scan:
-    #      print(point)
-

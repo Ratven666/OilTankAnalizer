@@ -1,18 +1,6 @@
-from abc import ABC, abstractmethod
 
-from Cylinder import Cylinder
-from DeformationScan import DeformationScan
-
-
-class DeformationCalculatorABC(ABC):
-
-    @abstractmethod
-    def __init__(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def calculate(self, def_scan: DeformationScan):
-        pass
+from app.base.Cylinder import Cylinder
+from app.deformation.calculators.DeformationCalculatorABC import DeformationCalculatorABC
 
 
 class CylinderDeformationCalculator(DeformationCalculatorABC):

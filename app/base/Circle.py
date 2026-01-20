@@ -49,5 +49,3 @@ class Circle:
                 print(self)
             if abs(max(t)[0]) < max_tolerance:
                 break
-
-
